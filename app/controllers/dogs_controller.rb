@@ -1,11 +1,17 @@
 class DogsController < ApplicationController
-  before_action :set_dog, only: [:show, :edit, :update, :destroy]
+  before_action :set_dog, only: [:show, :edit, :update, :destroy, :like]
   before_action :check_authorization, only: [:edit, :update, :destroy]
 
   # GET /dogs
   # GET /dogs.json
   def index
-    @dogs = Dog.paginate(page: params[:page], per_page: 5)
+    # This is really ugly. It gets all the records, the number of likes per
+    # dog, if the user already liked the dog, all in a single query. This should
+    # be in a scope or something.
+    @dogs = Dog.joins("LEFT OUTER JOIN likes lc ON lc.dog_id = dogs.id AND lc.created_at >= date('now', '-1 hour')")
+      .joins("LEFT OUTER JOIN likes ul ON ul.dog_id = dogs.id AND ul.user_id = #{current_user.id}")
+      .distinct
+      .select('dogs.*, COUNT(lc.id) AS like_count, COUNT(ul.id) as user_liked').group('dogs.id').paginate(page: params[:page], per_page: 5)
   end
 
   # GET /dogs/1
@@ -65,6 +71,23 @@ class DogsController < ApplicationController
     respond_to do |format|
       format.html { redirect_to dogs_url, notice: 'Dog was successfully destroyed.' }
       format.json { head :no_content }
+    end
+  end
+
+  def like
+    if @dog.user == current_user
+      redirect_to(dogs_path, flash: { alert: "Hey now, we all like our own dogs!" })
+      return
+    end
+    @like = Like.new(dog: @dog, user: current_user)
+    respond_to do |format|
+      if @like.save
+        format.html { redirect_to dogs_path, notice: 'Dog was successfully liked.' }
+        format.json { render :show, status: :created, location: dogs_path }
+      else
+        format.html { render :new }
+        format.json { render json: @like.errors, status: :unprocessable_entity }
+      end
     end
   end
 

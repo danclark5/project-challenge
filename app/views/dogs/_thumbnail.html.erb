@@ -1,6 +1,12 @@
 <a href="<%= url_for(dog) %>">
   <article>
     <h2 class="dog-name"><%= dog.name %></h2>
+    <div><%=dog.like_count%> Likes in the last hour</div>
     <%= image_tag url_for(dog.images.first), class: "dog-photo", alt: "Photo of #{dog.name}" %>
   </article>
 </a>
+<% if dog.user != current_user && dog.user_liked == 0 %>
+  <%= link_to "Click here to like #{dog.name}!!", like_dog_path(dog), method: :post %>
+<% elsif dog.user != current_user %>
+  <div> You already liked <%=dog.name%>.</div>
+<% end %>
