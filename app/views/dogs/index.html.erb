@@ -1,2 +1,8 @@
+<% if @order == 'popular' %>
+  <%= link_to "Remove popularity sort", dogs_path%>
+<% else %>
+  <%= link_to "Sort by popularity", dogs_path(order: 'popular')%>
+<% end %>
+
 <%= render partial: 'thumbnail', collection: @dogs, as: :dog %>
 <%= will_paginate @dogs %>
