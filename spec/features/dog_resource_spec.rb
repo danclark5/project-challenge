@@ -2,6 +2,7 @@ require 'rails_helper'
 
 describe 'Dog resource', type: :feature do
   let (:authenticated_user) { FactoryBot.create(:user) }
+  let (:another_user) { FactoryBot.create(:user, email: 'another@example.com') }
   before do
     login_as(authenticated_user, :scope => :user)
   end
@@ -21,6 +22,14 @@ describe 'Dog resource', type: :feature do
     fill_in 'Name', with: 'Speck'
     click_button 'Update Dog'
     expect(dog.reload.name).to eq('Speck')
+  end
+
+  it 'redirects when editing a another user\'s dog' do
+    dog = create(:dog, user: another_user )
+    visit edit_dog_path(dog)
+    expect(page).to have_current_path(dogs_path)
+    expect(find('#navigation')).to
+    expect(page).to have_content 'Not authorized'
   end
 
   it 'can delete a dog profile' do
