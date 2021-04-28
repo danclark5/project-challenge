@@ -9,7 +9,7 @@ class DogsController < ApplicationController
     # dog, if the user already liked the dog, all in a single query. This should
     # be in a scope or something.
     @dogs = Dog.joins("LEFT OUTER JOIN likes lc ON lc.dog_id = dogs.id AND lc.created_at >= date('now', '-1 hour')")
-      .joins("LEFT OUTER JOIN likes ul ON ul.dog_id = dogs.id AND ul.user_id = #{current_user.id}")
+      .joins("LEFT OUTER JOIN likes ul ON ul.dog_id = dogs.id AND ul.user_id = #{current_user&.id || 0}")
       .distinct
       .select('dogs.*, COUNT(lc.id) AS like_count, COUNT(ul.id) as user_liked').group('dogs.id').paginate(page: params[:page], per_page: 5)
   end

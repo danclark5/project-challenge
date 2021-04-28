@@ -28,7 +28,6 @@ describe 'Dog resource', type: :feature do
     dog = create(:dog, user: another_user )
     visit edit_dog_path(dog)
     expect(page).to have_current_path(dogs_path)
-    expect(find('#navigation')).to
     expect(page).to have_content 'Not authorized'
   end
 

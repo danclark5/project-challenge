@@ -1,17 +1,19 @@
 require 'rails_helper'
 
 RSpec.describe DogsController, type: :controller do
+  login_user
   describe '#index' do
+
     it 'displays recent dogs' do
-      2.times { create(:dog) }
+      2.times { create(:dog, user: subject.current_user) }
       get :index
-      expect(assigns(:dogs).size).to eq(2)
+      expect(assigns(:dogs).length).to eq(2)
     end
 
     it 'displays first five dogs' do
-      6.times { create(:dog) }
+      6.times { create(:dog, user: subject.current_user) }
       get :index
-      expect(assigns(:dogs).size).to eq(5)
+      expect(assigns(:dogs).length).to eq(5)
     end
   end
 
